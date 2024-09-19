@@ -13,3 +13,7 @@ class CustomUser(AbstractUser):
     )
     bio = models.TextField('Биография', blank=True)
     role = models.CharField('Роль', max_length=16, choices=ROLES, default=USER)
+
+    class Meta:
+        verbose_name = 'пользователь'
+        verbose_name_plural = 'Пользователи'
