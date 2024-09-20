@@ -13,14 +13,14 @@ class ReviewSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Review
-        fields = ('id', 'text', 'author', 'score', 'pub_date', 'title')
+        fields = ('id', 'text', 'author', 'score', 'pub_date', 'title_id')
         validators = (
             serializers.UniqueTogetherValidator(
                 queryset=Review.objects.all(),
-                fields=('author', 'title')
+                fields=('author', 'title_id')
             ),
         )
-        read_only_fields = ('title',)
+        read_only_fields = ('title_id',)
 
     def validate_score(self, value):
         if not isinstance(value, int):

@@ -21,14 +21,14 @@ class Review(models.Model):
             MaxValueValidator(10, message='Оценка не должна быть больше 10')
         ]
     )
-    title = models.ForeignKey(
+    title_id = models.ForeignKey(
         Title, on_delete=models.CASCADE, related_name='reviews'
     )
 
     class Meta:
         contraints = (
             models.UniqueConstraint(
-                fields=('author', 'title'),
+                fields=('author', 'title_id'),
                 name='Один отзыв от автора для одного тайтла'
             ),
         )

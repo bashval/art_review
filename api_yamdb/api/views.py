@@ -25,4 +25,4 @@ class ReviewViewSet(
 
     def perform_create(self, serializer):
         title = get_object_by_pk(Title, 'title_id', self.kwargs)
-        serializer.save(author=self.request.user, title=title)
+        serializer.save(author=self.request.user, title_id=title)
