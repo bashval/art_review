@@ -26,10 +26,10 @@ class Review(models.Model):
     )
 
     class Meta:
-        contraints = (
+        constraints = (
             models.UniqueConstraint(
                 fields=('author', 'title_id'),
-                name='unique_review_author_for_one_tile'
+                name='unique_review_author_for_one_title'
             ),
         )
 
