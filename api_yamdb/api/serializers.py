@@ -32,6 +32,8 @@ class ReviewSerializer(serializers.ModelSerializer):
         if not (1 <= value <= 10):
             raise serializers.ValidationError('Оценка должна быть от 1 до 10')
 
+        return value
+
     def to_representation(self, instance):
         representation = super().to_representation(instance)
         representation.pop('title_id', None)
