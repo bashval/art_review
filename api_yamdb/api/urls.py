@@ -8,6 +8,12 @@ router = DefaultRouter()
 router.register(
     r'titles/(?P<title_id>\d+)/reviews', ReviewViewSet, basename='reviews'
 )
+router.register(
+    (r'titles/(?P<title_pk>\d+)/reviews/(?P<review_pk>\d+)/'
+     r'comments/(?P<comment_pk>\d+)$'),
+    CommentViewSet,
+    basename='comments'
+)
 
 api_v1 = [
     path('', include(router.urls)),

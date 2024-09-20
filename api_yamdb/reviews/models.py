@@ -29,6 +29,17 @@ class Review(models.Model):
         contraints = (
             models.UniqueConstraint(
                 fields=('author', 'title_id'),
-                name='Один отзыв от автора для одного тайтла'
+                name='unique_review_author_for_one_tile'
             ),
         )
+
+
+class Comment(models.Model):
+    text = models.TextField()
+    pub_date = models.DateTimeField('Дата комментария', auto_now_add=True)
+    author = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name='comments'
+    )
+    review_id = models.ForeignKey(
+        Review, on_delete=models.CASCADE, related_name='comments'
+    )

@@ -1,3 +1,4 @@
+from rest_framework import mixins
 from rest_framework.response import Response
 
 
@@ -22,3 +23,10 @@ class PartialUpdateModelMixin:
 
     def perform_update(self, serializer):
         serializer.save()
+
+
+class ReviewCommentMixin(
+    mixins.ListModelMixin, mixins.RetrieveModelMixin, mixins.CreateModelMixin,
+    mixins.DestroyModelMixin, PartialUpdateModelMixin
+):
+    pass
