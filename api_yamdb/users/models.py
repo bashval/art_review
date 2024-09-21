@@ -13,6 +13,7 @@ class CustomUser(AbstractUser):
     )
     bio = models.TextField('Биография', blank=True)
     role = models.CharField('Роль', max_length=16, choices=ROLES, default=USER)
+    confirmation_code = models.CharField('Код подтверждения', max_length=12)
 
     class Meta:
         verbose_name = 'пользователь'
