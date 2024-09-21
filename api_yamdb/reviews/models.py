@@ -96,7 +96,7 @@ class GenreTitle(models.Model):
 
 
 class Review(models.Model):
-    '''Модель отзывов.'''
+    """Модель отзывов."""
 
     text = models.TextField(verbose_name='Текст')
     pub_date = models.DateTimeField('Дата публикаций', auto_now_add=True)
@@ -126,9 +126,14 @@ class Review(models.Model):
             ),
         )
 
+    def __str__(self):
+        """Описание отзывов произведения."""
+
+        return f'Отзыв об {self.title_id.name} от {self.author.username}'
+
 
 class Comment(models.Model):
-    '''Модель комментариев.'''
+    """Модель комментариев."""
 
     text = models.TextField(verbose_name='Текст')
     pub_date = models.DateTimeField('Дата комментария', auto_now_add=True)
@@ -144,3 +149,8 @@ class Comment(models.Model):
     class Meta:
         verbose_name = 'Комментарий'
         verbose_name_plural = 'Комментарии'
+
+    def __str__(self):
+        """Описание комментариев произведения."""
+
+        return f'Комментарий отзыва {self.review_id.title_id.name}'

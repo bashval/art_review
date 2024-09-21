@@ -1,6 +1,6 @@
 from rest_framework import pagination, viewsets
 
-from .methods import get_object_by_pk
+from .utils import get_object_by_pk
 from .mixins import ReviewCommentMixin
 from .permissions import IsAdmin, IsAdminOrReadOnly, IsOwnerOrStaffOrReadOnly
 from .serializers import CommentSerializer, ReviewSerializer
