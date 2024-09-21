@@ -3,11 +3,8 @@ from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 
 from .views import CommentViewSet, ReviewViewSet
-from .views import (
-    # ObtainTokenView,
+from users.views import (
     UserForAdminViewSet,
-    # UserSignupAPIView,
-    user_update_himself,
     user_signup_view,
     obtain_token_view
 )
@@ -29,10 +26,7 @@ api_v1 = [
 ]
 
 urlpatterns = [
-    # path('v1/auth/signup/', UserSignupAPIView.as_view()),
     path("v1/auth/signup/", user_signup_view, name="signup"),
-    # path('v1/auth/token/', TokenObtainPairView.as_view()),
     path('v1/auth/token/', obtain_token_view, name='token'),
-    path('v1/users/me/', user_update_himself),
     path('v1/', include(api_v1)),
 ]
