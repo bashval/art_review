@@ -1,8 +1,9 @@
 from django.contrib.auth import get_user_model
+from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
+from django.db.utils import IntegrityError
 from django.shortcuts import get_object_or_404
-from django.utils.crypto import get_random_string
-from rest_framework import filters, generics, permissions, status, viewsets
+from rest_framework import filters, generics, status, viewsets
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import AllowAny
@@ -10,7 +11,15 @@ from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken
 
 from .permissions import IsAdmin
-from .serializers import UserForHimselfSerializer, UserPostSerializer, UserSerializer, UserSignupSerializer
+from .serializers import UserForHimselfSerializer, UserSerializer, UserSignupSerializer
+
+from .utils import get_object_by_pk
+from .mixins import ReviewCommentMixin
+from .permissions import IsAdmin, IsOwnerOrStaffOrReadOnly
+from .serializers import CommentSerializer, ReviewSerializer, TokenObtainSerializer
+
+from reviews.models import Title
+
 
 User = get_user_model()
 
@@ -29,14 +38,18 @@ def send_confirmatio_mail(email, code):
 @permission_classes([AllowAny])
 def user_signup_view(request):
     serializer = UserSignupSerializer(data=request.data)
-    if not serializer.is_valid():
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    serializer.is_valid(raise_exception=True)
     username = serializer.validated_data.get('username')
     email = serializer.validated_data.get('email')
-    if not User.objects.filter(username=username, email=email).exists():
-        serializer.save()
+    try:
+        user, _ = User.objects.get_or_create(username=username, email=email)
+    except IntegrityError:
+        return Response(
+            'Something wrong',
+            status=status.HTTP_400_BAD_REQUEST
+        )
     if not (request.user.is_authenticated and request.user.role == User.ADMIN):
-        code = '31428'
+        code = default_token_generator.make_token(user)
         send_confirmatio_mail(email, code)
     return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -44,27 +57,18 @@ def user_signup_view(request):
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def obtain_token_view(request):
-    user = get_object_or_404(User, username=request.data.get('username'))
-    access_token = AccessToken.for_user(user=user)
-    return Response({'token': str(access_token)})
-
-
-class UserSignupAPIView(generics.CreateAPIView):
-    serializer_class = UserSignupSerializer
-    permission_classes = [permissions.AllowAny]
-
-    def create(self, request, *args, **kwargs):
-        response = super().create(request, *args, **kwargs)
-        response.status_code = status.HTTP_200_OK
-        confirmation_code = '31428'
-        send_mail(
-            subject='Confirmation Code',
-            message=confirmation_code,
-            from_email='from@dummy-mail.com',
-            recipient_list=[request.data.get('email')],
-            fail_silently=True
+    serializer = TokenObtainSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
+    username = serializer.validated_data.get('username')
+    confirmation_code = serializer.validated_data.get('confirmation_code')
+    user = get_object_or_404(User, username=username)
+    if not default_token_generator.check_token(user, confirmation_code):
+        return Response(
+            'Something wrong',
+            status=status.HTTP_400_BAD_REQUEST
         )
-        return response
+    access_token = AccessToken.for_user(user)
+    return Response({'token': str(access_token)})
 
 
 class UserForAdminViewSet(
@@ -82,11 +86,6 @@ class UserForAdminViewSet(
     filter_backends = (filters.SearchFilter,)
     search_fields = ('username',)
 
-    def get_serializer_class(self):
-        if self.request.method == 'POST':
-            return UserPostSerializer
-        return super().get_serializer_class()
-
 
 @api_view(['GET', 'PATCH'])
 def user_update_himself(request):
@@ -103,9 +102,39 @@ def user_update_himself(request):
     return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-# class UserForHimselfViewSet(generics.RetrieveUpdateAPIView):
-#     serializer_class = UserForHimselfSerializer
-#     permission_classes = [IsUserItself]
+class ReviewViewSet(ReviewCommentMixin, viewsets.GenericViewSet):
+    serializer_class = ReviewSerializer
+    permission_classes = (IsOwnerOrStaffOrReadOnly,)
+    pagination_class = PageNumberPagination
 
-#     def get_queryset(self):
-#         return self.request.user
+    def get_queryset(self):
+        title = get_object_by_pk(Title, 'title_id', self.kwargs)
+        reviews = title.reviews.all()
+        return reviews
+
+    def perform_create(self, serializer):
+        title = get_object_by_pk(Title, 'title_id', self.kwargs)
+        serializer.save(author=self.request.user, title_id=title)
+
+
+class CommentViewSet(ReviewCommentMixin, viewsets.GenericViewSet):
+    serializer_class = CommentSerializer
+    permission_classes = (IsOwnerOrStaffOrReadOnly,)
+    pagination_class = PageNumberPagination
+
+    def get_review(self):
+        title = get_object_by_pk(Title, 'title_id', self.kwargs)
+        review = get_object_by_pk(
+            title.reviews.all(), 'review_id', self.kwargs
+        )
+
+        return review
+
+    def get_queryset(self):
+        review = self.get_review()
+        comments = review.comments.all()
+        return comments
+
+    def perform_create(self, serializer):
+        review = self.get_review()
+        serializer.save(author=self.request.user, review_id=review)

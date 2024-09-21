@@ -1,19 +1,32 @@
 from django.urls import include, path
-from rest_framework.routers import DefaultRouter
-# from rest_framework_simplejwt.views import TokenObtainPairView
 
+from rest_framework.routers import DefaultRouter
+
+from .views import CommentViewSet, ReviewViewSet
 from .views import (
-    # MyTokenObtainPairView,
+    # ObtainTokenView,
     UserForAdminViewSet,
-    UserSignupAPIView,
+    # UserSignupAPIView,
     user_update_himself,
     user_signup_view,
     obtain_token_view
 )
 
-
 router_v1 = DefaultRouter()
 router_v1.register(r'users', UserForAdminViewSet)
+router_v1.register(
+    r'titles/(?P<title_id>\d+)/reviews', ReviewViewSet, basename='reviews'
+)
+router_v1.register(
+    (r'titles/(?P<title_pk>\d+)/reviews/(?P<review_pk>\d+)/'
+     r'comments/(?P<comment_pk>\d+)$'),
+    CommentViewSet,
+    basename='comments'
+)
+
+api_v1 = [
+    path('', include(router_v1.urls)),
+]
 
 urlpatterns = [
     # path('v1/auth/signup/', UserSignupAPIView.as_view()),
@@ -21,6 +34,5 @@ urlpatterns = [
     # path('v1/auth/token/', TokenObtainPairView.as_view()),
     path('v1/auth/token/', obtain_token_view, name='token'),
     path('v1/users/me/', user_update_himself),
-    # path(r'^v1/users/(?P<username>[\w/./@/+/-]+)$', UserForAdminViewSet.as_view()),
-    path('v1/', include(router_v1.urls)),
+    path('v1/', include(api_v1)),
 ]

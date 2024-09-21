@@ -1,6 +1,8 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
+from .constants import USER_ROLE_LENGTH
+
 
 class CustomUser(AbstractUser):
     ADMIN = 'admin'
@@ -11,9 +13,13 @@ class CustomUser(AbstractUser):
         (MODERATOR, 'moderator'),
         (USER, 'user')
     )
+
+    email = models.EmailField(
+        'Адрес электронной почты', max_length=254, unique=True)
     bio = models.TextField('Биография', blank=True)
-    role = models.CharField('Роль', max_length=16, choices=ROLES, default=USER)
-    confirmation_code = models.CharField('Код подтверждения', max_length=12)
+    role = models.CharField(
+        'Роль', max_length=USER_ROLE_LENGTH, choices=ROLES, default=USER
+    )
 
     class Meta:
         verbose_name = 'пользователь'
