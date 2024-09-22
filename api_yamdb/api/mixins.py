@@ -9,12 +9,13 @@ class CreateListDestroyViewset(
     viewsets.GenericViewSet
 ):
     pass
-  
-  
+
+
 class PartialUpdateModelMixin:
     """
     Кастомный миксин только для частичных обновлений.
     """
+
     def partial_update(self, request, *args, **kwargs):
         partial = True
         instance = self.get_object()

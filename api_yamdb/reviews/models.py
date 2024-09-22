@@ -43,7 +43,9 @@ class Title(models.Model):
     """Произведение."""
 
     name = models.CharField(verbose_name='Произведение', max_length=256)
-    year = models.SmallIntegerField(verbose_name='Год выпуска',) # Подсмотрел у Санжара в модели валидатор MaxValueValidator, можно воткнуть чтобы дату больше чем сегодняшняя не поставить
+    year = models.SmallIntegerField(verbose_name='Год выпуска',)
+    # Подсмотрел у Санжара в модели валидатор MaxValueValidator,
+    # можно воткнуть чтобы дату больше чем сегодняшняя не поставить
     description = models.TextField(verbose_name='Описание')
     genre = models.ManyToManyField(
         Genre,
@@ -59,7 +61,8 @@ class Title(models.Model):
         verbose_name='Категория'
     )
 
-    # "rating =" возможно нужно будет для реализации отображения рейтинга произведения
+    # "rating =" возможно нужно будет для реализации
+    # отображения рейтинга произведения
 
     class Meta:
         ordering = ['name']
