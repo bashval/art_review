@@ -1,17 +1,18 @@
-from rest_framework import pagination, viewsets
+from rest_framework import viewsets
+from rest_framework.pagination import PageNumberPagination
+
+from reviews.models import Title
 
 from .utils import get_object_by_pk
 from .mixins import ReviewCommentMixin
-from .permissions import IsAdmin, IsAdminOrReadOnly, IsOwnerOrStaffOrReadOnly
+from .permissions import IsOwnerOrStaffOrReadOnly
 from .serializers import CommentSerializer, ReviewSerializer
-
-from reviews.models import Title
 
 
 class ReviewViewSet(ReviewCommentMixin, viewsets.GenericViewSet):
     serializer_class = ReviewSerializer
     permission_classes = (IsOwnerOrStaffOrReadOnly,)
-    pagination_class = pagination.PageNumberPagination
+    pagination_class = PageNumberPagination
 
     def get_queryset(self):
         title = get_object_by_pk(Title, 'title_id', self.kwargs)
@@ -26,7 +27,7 @@ class ReviewViewSet(ReviewCommentMixin, viewsets.GenericViewSet):
 class CommentViewSet(ReviewCommentMixin, viewsets.GenericViewSet):
     serializer_class = CommentSerializer
     permission_classes = (IsOwnerOrStaffOrReadOnly,)
-    pagination_class = pagination.PageNumberPagination
+    pagination_class = PageNumberPagination
 
     def get_review(self):
         title = get_object_by_pk(Title, 'title_id', self.kwargs)
