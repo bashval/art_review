@@ -1,12 +1,65 @@
+from django.db.models import Avg
+from django.shortcuts import get_object_or_404
+
+from django_filters.rest_framework import DjangoFilterBackend
+
 from rest_framework import viewsets
+from rest_framework import filters, viewsets
 from rest_framework.pagination import PageNumberPagination
 
-from reviews.models import Title
-
-from .utils import get_object_by_pk
-from .mixins import ReviewCommentMixin
+from reviews.models import Category, Genre, Title
+from .filters import TitleFilter
+from .mixins import CreateListDestroyViewset, ReviewCommentMixin
 from .permissions import IsOwnerOrStaffOrReadOnly
-from .serializers import CommentSerializer, ReviewSerializer
+from .serializers import (
+    CategorySerializer,
+    GenreSerializer,
+    TitleCreateSerializer,
+    TitleReadSerializer,
+    CommentSerializer,
+    ReviewSerializer
+)
+from .utils import get_object_by_pk
+
+
+class GenreViewSet(CreateListDestroyViewset):
+    """Вью-класс для жанров."""
+
+    queryset = Genre.objects.all()
+    serializer_class = GenreSerializer
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('name',)
+    lookup_field = 'slug'
+    #permission_classes = 
+    pagination_class = PageNumberPagination
+
+
+class CategoryViewSet(CreateListDestroyViewset):
+    """Вью-класс для категорий."""
+
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('name',)
+    lookup_field = "slug"
+    #permission_classes = 
+    pagination_class = PageNumberPagination
+
+
+class TitleViewSet(viewsets.ModelViewSet):
+    queryset = Title.objects.order_by('id').annotate(
+        rating=Avg('reviews__score')
+    )
+    serializer_class = TitleCreateSerializer
+    #permission_classes =
+    filter_backends = [filters.SearchFilter, DjangoFilterBackend]
+    filterset_class = TitleFilter
+    pagination_class = PageNumberPagination
+
+    def get_serializer_class(self):
+        if self.action in ['create', 'update', 'partial_update']:
+            return TitleCreateSerializer
+        return TitleReadSerializer
 
 
 class ReviewViewSet(ReviewCommentMixin, viewsets.GenericViewSet):

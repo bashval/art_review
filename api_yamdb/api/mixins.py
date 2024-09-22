@@ -1,7 +1,16 @@
-from rest_framework import mixins
+from rest_framework import mixins, viewsets
 from rest_framework.response import Response
 
 
+class CreateListDestroyViewset(
+    mixins.ListModelMixin,
+    mixins.CreateModelMixin,
+    mixins.DestroyModelMixin,
+    viewsets.GenericViewSet
+):
+    pass
+  
+  
 class PartialUpdateModelMixin:
     """
     Кастомный миксин только для частичных обновлений.
@@ -28,5 +37,3 @@ class PartialUpdateModelMixin:
 class ReviewCommentMixin(
     mixins.ListModelMixin, mixins.RetrieveModelMixin, mixins.CreateModelMixin,
     mixins.DestroyModelMixin, PartialUpdateModelMixin
-):
-    pass
