@@ -6,10 +6,10 @@ User = get_user_model()
 
 
 class Genre(models.Model):
-    name = models.CharField(verbose_name='Наименование', max_length=200)
+    name = models.CharField(verbose_name='Наименование', max_length=256)
     slug = models.SlugField(
         verbose_name='Идентификатор',
-        max_length=200,
+        max_length=50,
         unique=True
     )
 
@@ -23,10 +23,10 @@ class Genre(models.Model):
 
 
 class Category(models.Model):
-    name = models.CharField(verbose_name='Наименование', max_length=200)
+    name = models.CharField(verbose_name='Наименование', max_length=256)
     slug = models.SlugField(
         verbose_name='Идентификатор',
-        max_length=200,
+        max_length=50,
         unique=True
     )
 
@@ -42,7 +42,7 @@ class Category(models.Model):
 class Title(models.Model):
     """Произведение."""
 
-    name = models.CharField(verbose_name='Произведение', max_length=80)
+    name = models.CharField(verbose_name='Произведение', max_length=256)
     year = models.SmallIntegerField(verbose_name='Год выпуска',) # Подсмотрел у Санжара в модели валидатор MaxValueValidator, можно воткнуть чтобы дату больше чем сегодняшняя не поставить
     description = models.TextField(verbose_name='Описание')
     genre = models.ManyToManyField(

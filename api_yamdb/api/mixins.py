@@ -37,3 +37,5 @@ class PartialUpdateModelMixin:
 class ReviewCommentMixin(
     mixins.ListModelMixin, mixins.RetrieveModelMixin, mixins.CreateModelMixin,
     mixins.DestroyModelMixin, PartialUpdateModelMixin
+):
+    pass
