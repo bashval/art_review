@@ -1,4 +1,5 @@
-from typing import Any
+from datetime import datetime
+
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 
@@ -11,6 +12,7 @@ from reviews.models import (
     Comment,
     Review
 )
+from reviews.constants import MAX_SCORE, MIN_SCORE
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -39,10 +41,19 @@ class TitleCreateSerializer(serializers.ModelSerializer):
         slug_field='slug',
         many=True
     )
+    description = serializers.CharField(required=False)
 
     class Meta:
         model = Title
-        fields = '__all__'
+        fields = ('id', 'name', 'year', 'description', 'genre', 'category')
+
+    def validate_year(self, value):
+        current_year = datetime.now().year
+        if value > current_year:
+            raise serializers.ValidationError(
+                'Год выпуска не может быть больше текущего.'
+            )
+        return value
 
 
 class TitleReadSerializer(serializers.ModelSerializer):
@@ -106,8 +117,9 @@ class ReviewSerializer(serializers.ModelSerializer):
                 'Оценка тайтлу должна быть целым числом'
             )
 
-        if not (1 <= value <= 10):
-            raise serializers.ValidationError('Оценка должна быть от 1 до 10')
+        if not (MIN_SCORE <= value <= MAX_SCORE):
+            message = f'Оценка должна быть от {MIN_SCORE} до {MAX_SCORE}'
+            raise serializers.ValidationError(message)
 
         return value
 

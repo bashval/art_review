@@ -2,14 +2,18 @@ from django.contrib.auth import get_user_model
 from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
 
+from .constants import NAME_LENGTH, SLUG_LENGTH, MAX_SCORE, MIN_SCORE
+
 User = get_user_model()
 
 
 class Genre(models.Model):
-    name = models.CharField(verbose_name='Наименование', max_length=256)
+    name = models.CharField(
+        verbose_name='Наименование', max_length=NAME_LENGTH
+    )
     slug = models.SlugField(
         verbose_name='Идентификатор',
-        max_length=50,
+        max_length=SLUG_LENGTH,
         unique=True
     )
 
@@ -26,7 +30,7 @@ class Category(models.Model):
     name = models.CharField(verbose_name='Наименование', max_length=256)
     slug = models.SlugField(
         verbose_name='Идентификатор',
-        max_length=50,
+        max_length=SLUG_LENGTH,
         unique=True
     )
 
@@ -42,8 +46,10 @@ class Category(models.Model):
 class Title(models.Model):
     """Произведение."""
 
-    name = models.CharField(verbose_name='Произведение', max_length=256)
-    year = models.SmallIntegerField(verbose_name='Год выпуска',) # Подсмотрел у Санжара в модели валидатор MaxValueValidator, можно воткнуть чтобы дату больше чем сегодняшняя не поставить
+    name = models.CharField(
+        verbose_name='Произведение', max_length=NAME_LENGTH
+    )
+    year = models.SmallIntegerField(verbose_name='Год выпуска',)
     description = models.TextField(verbose_name='Описание')
     genre = models.ManyToManyField(
         Genre,
@@ -58,8 +64,6 @@ class Title(models.Model):
         related_name='titles',
         verbose_name='Категория'
     )
-
-    # "rating =" возможно нужно будет для реализации отображения рейтинга произведения
 
     class Meta:
         ordering = ['name']
@@ -108,8 +112,12 @@ class Review(models.Model):
     )
     score = models.IntegerField(
         validators=[
-            MinValueValidator(1, message='Оценка не должна быть меньше 1'),
-            MaxValueValidator(10, message='Оценка не должна быть больше 10')
+            MinValueValidator(
+                MIN_SCORE, message=f'Оценка не должна быть меньше {MIN_SCORE}'
+            ),
+            MaxValueValidator(
+                MAX_SCORE, message=f'Оценка не должна быть больше {MAX_SCORE}'
+            )
         ],
         verbose_name='Оценка'
     )

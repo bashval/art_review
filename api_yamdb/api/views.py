@@ -1,15 +1,14 @@
 from django.db.models import Avg
-from django.shortcuts import get_object_or_404
 
-# from django_filters.rest_framework import DjangoFilterBackend
+from django_filters.rest_framework import DjangoFilterBackend
 
 from rest_framework import filters, viewsets
 from rest_framework.pagination import PageNumberPagination
 
 from reviews.models import Category, Genre, Title
-# from .filters import TitleFilter
+from .filters import TitleFilter
 from .mixins import CreateListDestroyViewset, ReviewCommentMixin
-from .permissions import IsOwnerOrStaffOrReadOnly, IsAdminOrReadOnly
+from .permissions import IsAdminOrReadOnly
 from .serializers import (
     CategorySerializer,
     GenreSerializer,
@@ -51,9 +50,10 @@ class TitleViewSet(viewsets.ModelViewSet):
     )
     serializer_class = TitleCreateSerializer
     permission_classes = (IsAdminOrReadOnly,)
-    # filter_backends = [filters.SearchFilter, DjangoFilterBackend]
-    # filterset_class = TitleFilter
+    filter_backends = [filters.SearchFilter, DjangoFilterBackend]
+    filterset_class = TitleFilter
     pagination_class = PageNumberPagination
+    http_method_names = ('get', 'post', 'patch', 'delete')
 
     def get_serializer_class(self):
         if self.action in ['create', 'update', 'partial_update']:
@@ -83,7 +83,6 @@ class CommentViewSet(ReviewCommentMixin, viewsets.ModelViewSet):
         review = get_object_by_pk(
             title.reviews.all(), 'review_id', self.kwargs
         )
-
         return review
 
     def get_queryset(self):
