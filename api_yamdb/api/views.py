@@ -3,7 +3,6 @@ from django.shortcuts import get_object_or_404
 
 # from django_filters.rest_framework import DjangoFilterBackend
 
-from rest_framework import viewsets
 from rest_framework import filters, viewsets
 from rest_framework.pagination import PageNumberPagination
 
@@ -67,7 +66,7 @@ class ReviewViewSet(ReviewCommentMixin, viewsets.ModelViewSet):
 
     def get_queryset(self):
         title = get_object_by_pk(Title, 'title_id', self.kwargs)
-        reviews = title.reviews.all().order_by('id')
+        reviews = title.reviews.all().order_by('id', 'pub_date')
         return reviews
 
     def get_serializer_context(self):
@@ -89,7 +88,7 @@ class CommentViewSet(ReviewCommentMixin, viewsets.ModelViewSet):
 
     def get_queryset(self):
         review = self.get_review()
-        comments = review.comments.all().order_by('id')
+        comments = review.comments.all().order_by('id', 'pub_date')
         return comments
 
     def get_serializer_context(self):
