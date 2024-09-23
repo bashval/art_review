@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 
@@ -39,10 +41,19 @@ class TitleCreateSerializer(serializers.ModelSerializer):
         slug_field='slug',
         many=True
     )
+    description = serializers.CharField(required=False)
 
     class Meta:
         model = Title
-        fields = '__all__'
+        fields = ('id', 'name', 'year', 'description', 'genre', 'category')
+
+    def validate_year(self, value):
+        current_year = datetime.now().year
+        if value > current_year:
+            raise serializers.ValidationError(
+                'Год выпуска не может быть больше текущего.'
+            )
+        return value
 
 
 class TitleReadSerializer(serializers.ModelSerializer):
