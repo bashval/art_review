@@ -27,7 +27,7 @@ class IsOwnerOrStaffOrReadOnly(permissions.BasePermission):
             or (request.user.is_authenticated
                 and (request.user == obj.author
                      or request.user.role == User.ADMIN
-                     or request.user.role == User.MODERTOR
+                     or request.user.role == User.MODERATOR
                      or request.user.is_superuser))
         )
 
