@@ -84,7 +84,6 @@ class CommentViewSet(ReviewCommentMixin, viewsets.ModelViewSet):
         review = get_object_by_pk(
             title.reviews.all(), 'review_id', self.kwargs
         )
-
         return review
 
     def get_queryset(self):

@@ -119,7 +119,8 @@ class CommentSerializer(serializers.ModelSerializer):
         read_only=True,
         default=serializers.CurrentUserDefault()
     )
+    review = serializers.HiddenField(default=CustomDefault('review'))
 
     class Meta:
         model = Comment
-        fields = ('id', 'text', 'pub_date', 'author')
+        fields = ('id', 'text', 'pub_date', 'author', 'review')
