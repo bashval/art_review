@@ -14,7 +14,6 @@ from .serializers import (
     CategorySerializer,
     GenreSerializer,
     TitleCreateSerializer,
-    TitleReadSerializer,
     CommentSerializer,
     ReviewSerializer
 )
@@ -55,11 +54,7 @@ class TitleViewSet(viewsets.ModelViewSet):
     filterset_class = TitleFilter
     pagination_class = PageNumberPagination
     http_method_names = ('get', 'post', 'patch', 'delete')
-
-    def get_serializer_class(self):
-        if self.action in ['create', 'update', 'partial_update']:
-            return TitleCreateSerializer
-        return TitleReadSerializer
+    ordering = ('name', 'id')
 
 
 class ReviewViewSet(ReviewCommentMixin, viewsets.ModelViewSet):

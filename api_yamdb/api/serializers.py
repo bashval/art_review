@@ -1,7 +1,5 @@
 from datetime import datetime
-
-from django.db.models import Avg
-from django.shortcuts import get_object_or_404
+from collections import OrderedDict
 
 from rest_framework import serializers
 
@@ -31,21 +29,44 @@ class GenreSerializer(serializers.ModelSerializer):
         lookup_field = 'slug'
 
 
+class CustomSlugField(serializers.SlugRelatedField):
+
+    def __init__(self, represent_field=None, **kwargs):
+        assert represent_field is not None, (
+            'The `represent_field` argument is required.'
+        )
+        self.represent_field = represent_field
+        super().__init__(**kwargs)
+
+    def to_representation(self, obj):
+        ret = OrderedDict()
+        fields = self.represent_field
+
+        for field in fields:
+            value = getattr(obj, field)
+            ret[field] = value
+        return ret
+
+
 class TitleCreateSerializer(serializers.ModelSerializer):
-    category = serializers.SlugRelatedField(
+    category = CustomSlugField(
         queryset=Category.objects.all(),
-        slug_field='slug'
+        slug_field='slug',
+        represent_field=('name', 'slug')
     )
-    genre = serializers.SlugRelatedField(
+    genre = CustomSlugField(
         queryset=Genre.objects.all(),
         slug_field='slug',
-        many=True
+        many=True,
+        represent_field=('name', 'slug'),
+        allow_null=False
     )
     description = serializers.CharField(required=False)
+    rating = serializers.IntegerField(required=False, allow_null=True)
 
     class Meta:
         model = Title
-        fields = ('id', 'name', 'year', 'description', 'genre', 'category')
+        fields = '__all__'
 
     def validate_year(self, value):
         current_year = datetime.now().year
@@ -55,30 +76,12 @@ class TitleCreateSerializer(serializers.ModelSerializer):
             )
         return value
 
-
-class TitleReadSerializer(serializers.ModelSerializer):
-    category = CategorySerializer(
-        read_only=True
-    )
-    genre = GenreSerializer(
-        read_only=True,
-        many=True
-    )
-    rating = serializers.SerializerMethodField()
-
-    class Meta:
-        model = Title
-        fields = '__all__'
-
-    def get_rating(self, obj):
-        title = get_object_or_404(Title, pk=obj.id)
-        reviews_score = (title
-                         .reviews.all()
-                         .aggregate(Avg('score'))
-                         .get('score__avg'))
-        if reviews_score:
-            return int(reviews_score)
-        return
+    def validate_genre(self, value):
+        if not value:
+            raise serializers.ValidationError(
+                'Это поле не может быть пустым.'
+            )
+        return value
 
 
 class CustomDefault:
@@ -120,7 +123,6 @@ class ReviewSerializer(serializers.ModelSerializer):
         if not (MIN_SCORE <= value <= MAX_SCORE):
             message = f'Оценка должна быть от {MIN_SCORE} до {MAX_SCORE}'
             raise serializers.ValidationError(message)
-
         return value
 
 
