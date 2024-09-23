@@ -42,10 +42,13 @@ class TitleCreateSerializer(serializers.ModelSerializer):
         many=True
     )
     description = serializers.CharField(required=False)
+    rating = serializers.SerializerMethodField()
 
     class Meta:
         model = Title
-        fields = ('id', 'name', 'year', 'description', 'genre', 'category')
+        fields = (
+            'id', 'name', 'year', 'description', 'genre', 'category', 'rating'
+        )
 
     def validate_year(self, value):
         current_year = datetime.now().year
@@ -54,6 +57,16 @@ class TitleCreateSerializer(serializers.ModelSerializer):
                 'Год выпуска не может быть больше текущего.'
             )
         return value
+
+    def get_rating(self, obj):
+        title = get_object_or_404(Title, pk=obj.id)
+        reviews_score = (title
+                         .reviews.all()
+                         .aggregate(Avg('score'))
+                         .get('score__avg'))
+        if reviews_score:
+            return int(reviews_score)
+        return
 
 
 class TitleReadSerializer(serializers.ModelSerializer):
