@@ -1,4 +1,3 @@
-from typing import Any
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 
@@ -11,6 +10,7 @@ from reviews.models import (
     Comment,
     Review
 )
+from reviews.constants import MAX_SCORE, MIN_SCORE
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -106,8 +106,9 @@ class ReviewSerializer(serializers.ModelSerializer):
                 'Оценка тайтлу должна быть целым числом'
             )
 
-        if not (1 <= value <= 10):
-            raise serializers.ValidationError('Оценка должна быть от 1 до 10')
+        if not (MIN_SCORE <= value <= MAX_SCORE):
+            message = f'Оценка должна быть от {MIN_SCORE} до {MAX_SCORE}'
+            raise serializers.ValidationError(message)
 
         return value
 
@@ -118,8 +119,7 @@ class CommentSerializer(serializers.ModelSerializer):
         read_only=True,
         default=serializers.CurrentUserDefault()
     )
-    review = serializers.HiddenField(default=CustomDefault('review'))
 
     class Meta:
         model = Comment
-        fields = ('id', 'text', 'pub_date', 'author', 'review')
+        fields = ('id', 'text', 'pub_date', 'author')
