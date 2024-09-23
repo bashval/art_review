@@ -99,7 +99,9 @@ class Review(models.Model):
     """Модель отзывов."""
 
     text = models.TextField(verbose_name='Текст')
-    pub_date = models.DateTimeField('Дата публикаций', auto_now_add=True)
+    pub_date = models.DateTimeField(
+        verbose_name='Дата публикаций', auto_now_add=True
+    )
     author = models.ForeignKey(
         User, on_delete=models.CASCADE,
         related_name='reviews', verbose_name='Автор'
@@ -111,7 +113,7 @@ class Review(models.Model):
         ],
         verbose_name='Оценка'
     )
-    title_id = models.ForeignKey(
+    title = models.ForeignKey(
         Title, on_delete=models.CASCADE,
         related_name='reviews', verbose_name='Произведение'
     )
@@ -129,19 +131,21 @@ class Review(models.Model):
     def __str__(self):
         """Описание отзывов произведения."""
 
-        return f'Отзыв об {self.title_id.name} от {self.author.username}'
+        return f'Отзыв об {self.title.name} от {self.author.username}'
 
 
 class Comment(models.Model):
     """Модель комментариев."""
 
     text = models.TextField(verbose_name='Текст')
-    pub_date = models.DateTimeField('Дата комментария', auto_now_add=True)
+    pub_date = models.DateTimeField(
+        verbose_name='Дата комментария', auto_now_add=True
+    )
     author = models.ForeignKey(
         User, on_delete=models.CASCADE,
         related_name='comments', verbose_name='Автор'
     )
-    review_id = models.ForeignKey(
+    review = models.ForeignKey(
         Review, on_delete=models.CASCADE,
         related_name='comments', verbose_name='Ревью'
     )
@@ -153,4 +157,4 @@ class Comment(models.Model):
     def __str__(self):
         """Описание комментариев произведения."""
 
-        return f'Комментарий отзыва {self.review_id.title_id.name}'
+        return f'Комментарий отзыва {self.review.title.name}'

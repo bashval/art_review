@@ -6,11 +6,11 @@ from .constants import USER_ROLE_LENGTH
 
 class CustomUser(AbstractUser):
     ADMIN = 'admin'
-    MODERATOR = 'moderator'
+    MODERTOR = 'moderator'
     USER = 'user'
     ROLES = (
         (ADMIN, 'admin'),
-        (MODERATOR, 'moderator'),
+        (MODERTOR, 'moderator'),
         (USER, 'user')
     )
 

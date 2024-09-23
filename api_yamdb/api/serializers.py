@@ -1,3 +1,7 @@
+from typing import Any
+from django.db.models import Avg
+from django.shortcuts import get_object_or_404
+
 from rest_framework import serializers
 
 from reviews.models import (
@@ -49,13 +53,32 @@ class TitleReadSerializer(serializers.ModelSerializer):
         read_only=True,
         many=True
     )
-    rating = serializers.IntegerField(
-        read_only=True,
-    )
+    rating = serializers.SerializerMethodField()
 
     class Meta:
         model = Title
         fields = '__all__'
+
+    def get_rating(self, obj):
+        title = get_object_or_404(Title, pk=obj.id)
+        reviews_score = (title
+                         .reviews.all()
+                         .aggregate(Avg('score'))
+                         .get('score__avg'))
+        if reviews_score:
+            return int(reviews_score)
+        return
+
+
+class CustomDefault:
+    requires_context = True
+
+    def __init__(self, key_name):
+        self.key_name = key_name
+
+    def __call__(self, serializer_field):
+        obj = serializer_field.context.get(self.key_name)
+        return obj
 
 
 class ReviewSerializer(serializers.ModelSerializer):
@@ -64,18 +87,18 @@ class ReviewSerializer(serializers.ModelSerializer):
         read_only=True,
         default=serializers.CurrentUserDefault()
     )
+    title = serializers.HiddenField(default=CustomDefault('title'))
 
     class Meta:
         model = Review
-        fields = ('id', 'text', 'author', 'score', 'pub_date', 'title_id')
+        fields = ('id', 'text', 'author', 'score', 'pub_date', 'title')
         validators = (
             serializers.UniqueTogetherValidator(
                 queryset=Review.objects.all(),
-                fields=('author', 'title_id'),
+                fields=('author', 'title'),
                 message='Можно написать только один отзыв к тайтлу'
             ),
         )
-        read_only_fields = ('title_id',)
 
     def validate_score(self, value):
         if not isinstance(value, int):
@@ -88,11 +111,6 @@ class ReviewSerializer(serializers.ModelSerializer):
 
         return value
 
-    def to_representation(self, instance):
-        representation = super().to_representation(instance)
-        representation.pop('title_id', None)
-        return representation
-
 
 class CommentSerializer(serializers.ModelSerializer):
     author = serializers.SlugRelatedField(
@@ -100,13 +118,8 @@ class CommentSerializer(serializers.ModelSerializer):
         read_only=True,
         default=serializers.CurrentUserDefault()
     )
+    review = serializers.HiddenField(default=CustomDefault('review'))
 
     class Meta:
         model = Comment
-        fields = ('id', 'text', 'pub_date', 'author', 'review_id')
-        read_only_fields = ('review_id',)
-
-    def to_representation(self, instance):
-        representation = super().to_representation(instance)
-        representation.pop('review_id', None)
-        return representation
+        fields = ('id', 'text', 'pub_date', 'author', 'review')

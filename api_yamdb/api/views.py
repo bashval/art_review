@@ -62,25 +62,22 @@ class TitleViewSet(viewsets.ModelViewSet):
         return TitleReadSerializer
 
 
-class ReviewViewSet(ReviewCommentMixin, viewsets.GenericViewSet):
+class ReviewViewSet(ReviewCommentMixin, viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
-    permission_classes = (IsOwnerOrStaffOrReadOnly,)
-    pagination_class = PageNumberPagination
 
     def get_queryset(self):
         title = get_object_by_pk(Title, 'title_id', self.kwargs)
-        reviews = title.reviews.all()
+        reviews = title.reviews.all().order_by('id')
         return reviews
 
-    def perform_create(self, serializer):
-        title = get_object_by_pk(Title, 'title_id', self.kwargs)
-        serializer.save(author=self.request.user, title_id=title)
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context['title'] = get_object_by_pk(Title, 'title_id', self.kwargs)
+        return context
 
 
-class CommentViewSet(ReviewCommentMixin, viewsets.GenericViewSet):
+class CommentViewSet(ReviewCommentMixin, viewsets.ModelViewSet):
     serializer_class = CommentSerializer
-    permission_classes = (IsOwnerOrStaffOrReadOnly,)
-    pagination_class = PageNumberPagination
 
     def get_review(self):
         title = get_object_by_pk(Title, 'title_id', self.kwargs)
@@ -92,9 +89,10 @@ class CommentViewSet(ReviewCommentMixin, viewsets.GenericViewSet):
 
     def get_queryset(self):
         review = self.get_review()
-        comments = review.comments.all()
+        comments = review.comments.all().order_by('id')
         return comments
 
-    def perform_create(self, serializer):
-        review = self.get_review()
-        serializer.save(author=self.request.user, review_id=review)
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context['review'] = self.get_review()
+        return context
