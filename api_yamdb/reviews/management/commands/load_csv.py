@@ -39,10 +39,6 @@ class Command(BaseCommand):
         model = self.get_model_by_name(model_name)
         with open(file_path, encoding='utf=8') as file:
             reader = csv.DictReader(file)
-            # reader.fieldnames = [
-            #     name[:-3] if name[-3:] == '_id' else name
-            #     for name in reader.fieldnames
-            # ]
             count = 0
             for row in reader:
                 try:
@@ -59,6 +55,11 @@ class Command(BaseCommand):
                         f'Can not create object {row}. '
                         'Objects with partially matching values already exist '
                         'in DataBase.\nUNIQUE constraint violated.'
+                    )
+                except ValueError as err:
+                    raise CommandError(
+                        f'{err}\nPlease check fields names in CSV file. '
+                        'Field name for Related Fields should end in `_id`.'
                     )
         self.stdout.write(self.style.SUCCESS(
             f'Successfully load {file_name}.\n'
