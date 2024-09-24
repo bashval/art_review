@@ -1,8 +1,9 @@
-from datetime import datetime
 from collections import OrderedDict
+from datetime import datetime
 
 from rest_framework import serializers
 
+from reviews.constants import MAX_SCORE, MIN_SCORE
 from reviews.models import (
     Category,
     Genre,
@@ -10,7 +11,6 @@ from reviews.models import (
     Comment,
     Review
 )
-from reviews.constants import MAX_SCORE, MIN_SCORE
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -48,7 +48,7 @@ class CustomSlugField(serializers.SlugRelatedField):
         return ret
 
 
-class TitleCreateSerializer(serializers.ModelSerializer):
+class TitleSerializer(serializers.ModelSerializer):
     category = CustomSlugField(
         queryset=Category.objects.all(),
         slug_field='slug',
@@ -66,7 +66,9 @@ class TitleCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Title
-        fields = '__all__'
+        fields = (
+            'id', 'name', 'year', 'description', 'genre', 'category', 'rating'
+        )
 
     def validate_year(self, value):
         current_year = datetime.now().year
