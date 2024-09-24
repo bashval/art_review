@@ -48,7 +48,7 @@ class CustomSlugField(serializers.SlugRelatedField):
         return ret
 
 
-class TitleCreateSerializer(serializers.ModelSerializer):
+class TitleSerializer(serializers.ModelSerializer):
     category = CustomSlugField(
         queryset=Category.objects.all(),
         slug_field='slug',

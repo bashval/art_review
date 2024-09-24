@@ -12,7 +12,7 @@ from .permissions import IsAdminOrReadOnly
 from .serializers import (
     CategorySerializer,
     GenreSerializer,
-    TitleCreateSerializer,
+    TitleSerializer,
     CommentSerializer,
     ReviewSerializer
 )
@@ -47,7 +47,7 @@ class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.order_by('id').annotate(
         rating=Avg('reviews__score')
     )
-    serializer_class = TitleCreateSerializer
+    serializer_class = TitleSerializer
     permission_classes = (IsAdminOrReadOnly,)
     filter_backends = [filters.SearchFilter, DjangoFilterBackend]
     filterset_class = TitleFilter
