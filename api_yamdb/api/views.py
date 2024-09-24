@@ -20,7 +20,7 @@ from .utils import get_object_by_pk
 
 
 class GenreViewSet(CreateListDestroyViewset):
-    """Вью-класс для жанров."""
+    """Вьюсет для жанров."""
 
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
@@ -32,7 +32,7 @@ class GenreViewSet(CreateListDestroyViewset):
 
 
 class CategoryViewSet(CreateListDestroyViewset):
-    """Вью-класс для категорий."""
+    """Вьюсет для категорий."""
 
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
@@ -44,6 +44,8 @@ class CategoryViewSet(CreateListDestroyViewset):
 
 
 class TitleViewSet(viewsets.ModelViewSet):
+    """Вьюсет для произведений."""
+
     queryset = Title.objects.order_by('id').annotate(
         rating=Avg('reviews__score')
     )
@@ -57,6 +59,8 @@ class TitleViewSet(viewsets.ModelViewSet):
 
 
 class ReviewViewSet(ReviewCommentMixin, viewsets.ModelViewSet):
+    """Вьюсет для отзывов."""
+
     serializer_class = ReviewSerializer
 
     def get_queryset(self):
@@ -71,6 +75,8 @@ class ReviewViewSet(ReviewCommentMixin, viewsets.ModelViewSet):
 
 
 class CommentViewSet(ReviewCommentMixin, viewsets.ModelViewSet):
+    """Вьюсет для комментарии."""
+
     serializer_class = CommentSerializer
 
     def get_review(self):
