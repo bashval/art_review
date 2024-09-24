@@ -8,6 +8,8 @@ User = get_user_model()
 
 
 class Genre(models.Model):
+    """Жанры."""
+
     name = models.CharField(
         verbose_name='Наименование', max_length=NAME_LENGTH
     )
@@ -27,6 +29,8 @@ class Genre(models.Model):
 
 
 class Category(models.Model):
+    """Категории."""
+
     name = models.CharField(verbose_name='Наименование', max_length=256)
     slug = models.SlugField(
         verbose_name='Идентификатор',
@@ -44,7 +48,7 @@ class Category(models.Model):
 
 
 class Title(models.Model):
-    """Произведение."""
+    """Произведения."""
 
     name = models.CharField(
         verbose_name='Произведение', max_length=NAME_LENGTH
@@ -89,8 +93,6 @@ class GenreTitle(models.Model):
     )
 
     class Meta:
-        """Мета класс жанров произведения."""
-
         verbose_name = 'Жанр произведения'
         verbose_name_plural = 'Жанры произведения'
 
@@ -143,7 +145,7 @@ class Review(models.Model):
 
 
 class Comment(models.Model):
-    """Модель комментариев."""
+    """Комментарии."""
 
     text = models.TextField(verbose_name='Текст')
     pub_date = models.DateTimeField(
