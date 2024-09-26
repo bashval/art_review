@@ -11,6 +11,7 @@ from reviews.models import (
     Comment,
     Review
 )
+from .utils import get_object_by_pk
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -86,15 +87,15 @@ class TitleSerializer(serializers.ModelSerializer):
         return value
 
 
-class CustomDefault:
+class TitleDefault:
     requires_context = True
 
-    def __init__(self, key_name):
-        self.key_name = key_name
-
     def __call__(self, serializer_field):
-        obj = serializer_field.context.get(self.key_name)
-        return obj
+        request = serializer_field.context.get('request')
+        title = get_object_by_pk(Title,
+                                 request.parser_context['kwargs'],
+                                 pk='title_id')
+        return title
 
 
 class ReviewSerializer(serializers.ModelSerializer):
@@ -103,7 +104,8 @@ class ReviewSerializer(serializers.ModelSerializer):
         read_only=True,
         default=serializers.CurrentUserDefault()
     )
-    title = serializers.HiddenField(default=CustomDefault('title'))
+    title = serializers.HiddenField(default=TitleDefault())
+    score = serializers.IntegerField(min_value=MIN_SCORE, max_value=MAX_SCORE)
 
     class Meta:
         model = Review
@@ -116,17 +118,6 @@ class ReviewSerializer(serializers.ModelSerializer):
             ),
         )
 
-    def validate_score(self, value):
-        if not isinstance(value, int):
-            raise serializers.ValidationError(
-                'Оценка тайтлу должна быть целым числом'
-            )
-
-        if not (MIN_SCORE <= value <= MAX_SCORE):
-            message = f'Оценка должна быть от {MIN_SCORE} до {MAX_SCORE}'
-            raise serializers.ValidationError(message)
-        return value
-
 
 class CommentSerializer(serializers.ModelSerializer):
     author = serializers.SlugRelatedField(
@@ -134,8 +125,7 @@ class CommentSerializer(serializers.ModelSerializer):
         read_only=True,
         default=serializers.CurrentUserDefault()
     )
-    review = serializers.HiddenField(default=CustomDefault('review'))
 
     class Meta:
         model = Comment
-        fields = ('id', 'text', 'pub_date', 'author', 'review')
+        fields = ('id', 'text', 'pub_date', 'author')

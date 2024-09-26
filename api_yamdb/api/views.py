@@ -1,11 +1,9 @@
 from django.db.models import Avg
-
 from django_filters.rest_framework import DjangoFilterBackend
-
 from rest_framework import filters, viewsets
 from rest_framework.pagination import PageNumberPagination
 
-from reviews.models import Category, Genre, Title
+from reviews.models import Category, Genre, Review, Title
 from .filters import TitleFilter
 from .mixins import CreateListDestroyViewset, ReviewCommentMixin
 from .permissions import IsAdminOrReadOnly
@@ -63,15 +61,17 @@ class ReviewViewSet(ReviewCommentMixin, viewsets.ModelViewSet):
 
     serializer_class = ReviewSerializer
 
+    @property
+    def get_title(self):
+        title = get_object_by_pk(Title, self.kwargs, pk='title_id')
+        return title
+
     def get_queryset(self):
-        title = get_object_by_pk(Title, 'title_id', self.kwargs)
-        reviews = title.reviews.all().order_by('-pub_date', 'id')
+        reviews = self.get_title.reviews.all()
         return reviews
 
-    def get_serializer_context(self):
-        context = super().get_serializer_context()
-        context['title'] = get_object_by_pk(Title, 'title_id', self.kwargs)
-        return context
+    def perform_create(self, serializer):
+        serializer.save(author=self.request.user, title=self.get_title)
 
 
 class CommentViewSet(ReviewCommentMixin, viewsets.ModelViewSet):
@@ -79,19 +79,16 @@ class CommentViewSet(ReviewCommentMixin, viewsets.ModelViewSet):
 
     serializer_class = CommentSerializer
 
+    @property
     def get_review(self):
-        title = get_object_by_pk(Title, 'title_id', self.kwargs)
         review = get_object_by_pk(
-            title.reviews.all(), 'review_id', self.kwargs
+            Review, self.kwargs, pk='review_id', title__id='title_id'
         )
         return review
 
     def get_queryset(self):
-        review = self.get_review()
-        comments = review.comments.all().order_by('-pub_date', 'id')
+        comments = self.get_review.comments.all()
         return comments
 
-    def get_serializer_context(self):
-        context = super().get_serializer_context()
-        context['review'] = self.get_review()
-        return context
+    def perform_create(self, serializer):
+        serializer.save(author=self.request.user, review=self.get_review)
