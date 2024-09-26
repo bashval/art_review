@@ -31,7 +31,10 @@ class Genre(models.Model):
 class Category(models.Model):
     """Категории."""
 
-    name = models.CharField(verbose_name='Наименование', max_length=256)
+    name = models.CharField(
+        verbose_name='Наименование',
+        max_length=NAME_LENGTH
+    )
     slug = models.SlugField(
         verbose_name='Идентификатор',
         max_length=SLUG_LENGTH,
