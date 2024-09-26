@@ -17,6 +17,3 @@ class ReviewCommentMixin:
     permission_classes = (IsOwnerOrStaffOrReadOnly,)
     pagination_class = PageNumberPagination
     http_method_names = ('get', 'post', 'patch', 'delete')
-
-    def perform_create(self, serializer):
-        serializer.save(author=self.request.user)
