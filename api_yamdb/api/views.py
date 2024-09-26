@@ -5,7 +5,7 @@ from rest_framework.pagination import PageNumberPagination
 
 from reviews.models import Category, Genre, Review, Title
 from .filters import TitleFilter
-from .mixins import CreateListDestroyViewset, ReviewCommentMixin
+from .mixins import CategoryGenreMixin, ReviewCommentMixin
 from .permissions import IsAdminOrReadOnly
 from .serializers import (
     CategorySerializer,
@@ -17,28 +17,18 @@ from .serializers import (
 from .utils import get_object_by_pk
 
 
-class GenreViewSet(CreateListDestroyViewset):
+class GenreViewSet(CategoryGenreMixin):
     """Вьюсет для жанров."""
 
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
-    filter_backends = (filters.SearchFilter,)
-    search_fields = ('name',)
-    lookup_field = 'slug'
-    permission_classes = (IsAdminOrReadOnly,)
-    pagination_class = PageNumberPagination
 
 
-class CategoryViewSet(CreateListDestroyViewset):
+class CategoryViewSet(CategoryGenreMixin):
     """Вьюсет для категорий."""
 
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
-    filter_backends = (filters.SearchFilter,)
-    search_fields = ('name',)
-    lookup_field = "slug"
-    permission_classes = (IsAdminOrReadOnly,)
-    pagination_class = PageNumberPagination
 
 
 class TitleViewSet(viewsets.ModelViewSet):
