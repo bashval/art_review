@@ -21,6 +21,14 @@ class Users(AbstractUser):
         'Роль', max_length=USER_ROLE_LENGTH, choices=ROLES, default=USER
     )
 
+    @property
+    def is_admin(self):
+        return self.role == self.ADMIN
+
+    @property
+    def is_moderator(self):
+        return self.role == self.MODERATOR
+
     class Meta:
         ordering = ['id']
         verbose_name = 'пользователь'
