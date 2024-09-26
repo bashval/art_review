@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from django.contrib.auth import get_user_model
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
@@ -43,7 +45,7 @@ class Category(models.Model):
 
     class Meta:
         ordering = ['name']
-        verbose_name = 'Категория'
+        verbose_name = 'категория'
         verbose_name_plural = 'Категории'
 
     def __str__(self):
@@ -56,7 +58,15 @@ class Title(models.Model):
     name = models.CharField(
         verbose_name='Произведение', max_length=NAME_LENGTH
     )
-    year = models.SmallIntegerField(verbose_name='Год выпуска',)
+    year = models.SmallIntegerField(
+        verbose_name='Год выпуска',
+        validators=[
+            MaxValueValidator(
+                datetime.now().year,
+                message='Год не может быть в будущем.'
+            )
+        ]
+    )
     description = models.TextField(verbose_name='Описание')
     genre = models.ManyToManyField(
         Genre,
@@ -74,7 +84,7 @@ class Title(models.Model):
 
     class Meta:
         ordering = ['name']
-        verbose_name = 'Произведение'
+        verbose_name = 'произведение'
         verbose_name_plural = 'Произведения'
 
     def __str__(self):
@@ -96,7 +106,7 @@ class GenreTitle(models.Model):
     )
 
     class Meta:
-        verbose_name = 'Жанр произведения'
+        verbose_name = 'жанр произведения'
         verbose_name_plural = 'Жанры произведения'
 
     def __str__(self):
@@ -133,7 +143,7 @@ class Review(models.Model):
 
     class Meta:
         ordering = ('-pub_date', 'id')
-        verbose_name = 'Отзыв'
+        verbose_name = 'отзыв'
         verbose_name_plural = 'Отзывы'
         constraints = (
             models.UniqueConstraint(
@@ -166,7 +176,7 @@ class Comment(models.Model):
 
     class Meta:
         ordering = ('-pub_date', 'id')
-        verbose_name = 'Комментарий'
+        verbose_name = 'комментарий'
         verbose_name_plural = 'Комментарии'
 
     def __str__(self):
