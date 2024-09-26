@@ -59,12 +59,13 @@ class UserSignupSerializer(BaseUserSerializer):
         return data
 
 
-class TokenObtainSerializer(serializers.ModelSerializer):
+class TokenObtainSerializer(serializers.Serializer):
     confirmation_code = serializers.CharField(required=True)
-
-    class Meta:
-        model = User
-        fields = ('username', 'confirmation_code')
+    username = serializers.RegexField(
+        regex=UnicodeUsernameValidator.regex,
+        max_length=USERNAME_LENGTH,
+        required=True
+    )
 
     def validate(self, data):
         user = get_object_or_404(User, username=data.get('username'))
