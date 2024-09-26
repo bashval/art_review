@@ -30,7 +30,24 @@ class GenreSerializer(serializers.ModelSerializer):
         lookup_field = 'slug'
 
 
-class CustomSlugField(serializers.SlugRelatedField):
+class TitleBase(serializers.ModelSerializer):
+
+    class Meta:
+        model = Title
+        fields = (
+            'id', 'name', 'year', 'description', 'genre', 'category', 'rating'
+        )
+
+
+class TitleReadSerializer(TitleBase):
+    category = serializers.SlugRelatedField(
+        read_only=True,
+        slug_field='slug',
+    )
+    genre = GenreSerializer(many=True)
+
+
+class TitleCreateSlugField(serializers.SlugRelatedField):
 
     def __init__(self, represent_field=None, **kwargs):
         assert represent_field is not None, (
@@ -49,13 +66,13 @@ class CustomSlugField(serializers.SlugRelatedField):
         return ret
 
 
-class TitleSerializer(serializers.ModelSerializer):
-    category = CustomSlugField(
+class TitleCreateSerializer(TitleBase):
+    category = TitleCreateSlugField(
         queryset=Category.objects.all(),
         slug_field='slug',
         represent_field=('name', 'slug')
     )
-    genre = CustomSlugField(
+    genre = TitleCreateSlugField(
         queryset=Genre.objects.all(),
         slug_field='slug',
         many=True,
@@ -64,12 +81,6 @@ class TitleSerializer(serializers.ModelSerializer):
     )
     description = serializers.CharField(required=False)
     rating = serializers.IntegerField(required=False, allow_null=True)
-
-    class Meta:
-        model = Title
-        fields = (
-            'id', 'name', 'year', 'description', 'genre', 'category', 'rating'
-        )
 
     def validate_year(self, value):
         current_year = datetime.now().year

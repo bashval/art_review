@@ -10,7 +10,8 @@ from .permissions import IsAdminOrReadOnly
 from .serializers import (
     CategorySerializer,
     GenreSerializer,
-    TitleSerializer,
+    TitleReadSerializer,
+    TitleCreateSerializer,
     CommentSerializer,
     ReviewSerializer
 )
@@ -37,13 +38,17 @@ class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.order_by('id').annotate(
         rating=Avg('reviews__score')
     )
-    serializer_class = TitleSerializer
     permission_classes = (IsAdminOrReadOnly,)
     filter_backends = [filters.SearchFilter, DjangoFilterBackend]
     filterset_class = TitleFilter
     pagination_class = PageNumberPagination
     http_method_names = ('get', 'post', 'patch', 'delete')
     ordering = ('name', 'id')
+
+    def get_serializer_class(self):
+        if self.action == 'get':
+            return TitleReadSerializer
+        return TitleCreateSerializer
 
 
 class ReviewViewSet(ReviewCommentMixin, viewsets.ModelViewSet):
