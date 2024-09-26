@@ -15,7 +15,7 @@ from reviews.models import (
     Comment,
     Review
 )
-from users.constants import EMAIL_LENGTH, USERNAME_LENGTH
+from users.constants import USERNAME_LENGTH
 from .utils import get_object_by_pk
 
 User = get_user_model()
@@ -149,7 +149,12 @@ class CommentSerializer(serializers.ModelSerializer):
         fields = ('id', 'text', 'pub_date', 'author')
 
 
-class BaseUserSerializer(serializers.ModelSerializer):
+class UserSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = User
+        fields = ('username', 'email', 'first_name',
+                  'last_name', 'bio', 'role')
 
     def validate_username(self, value):
         if value == 'me':
@@ -159,42 +164,18 @@ class BaseUserSerializer(serializers.ModelSerializer):
         return value
 
 
-class UserSerializer(BaseUserSerializer):
-
-    class Meta:
-        model = User
-        fields = ('username', 'email', 'first_name',
-                  'last_name', 'bio', 'role')
-
-
-class UserSignupSerializer(BaseUserSerializer):
-    email = serializers.EmailField(
-        max_length=EMAIL_LENGTH,
-    )
-    username = serializers.RegexField(
-        regex=UnicodeUsernameValidator.regex,
-        max_length=USERNAME_LENGTH,
-        required=True
-    )
+class UserSignupSerializer(UserSerializer):
 
     class Meta:
         model = User
         fields = ('username', 'email')
 
-    def validate(self, data):
+    def run_validation(self, data):
         username = data.get('username')
         email = data.get('email')
         if user := User.objects.filter(username=username, email=email).first():
             self.instance = user
-            return data
-        if (
-            User.objects.filter(username=username).exists()
-            or User.objects.filter(email=email).exists()
-        ):
-            raise serializers.ValidationError(
-                'Пользователь с таким имем/почтой уже существует.'
-            )
-        return data
+        return super().run_validation(data)
 
 
 class TokenObtainSerializer(serializers.Serializer):
