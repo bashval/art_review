@@ -51,13 +51,13 @@ def obtain_token_view(request):
     confirmation_code = serializer.validated_data.get('confirmation_code')
     user = get_object_or_404(User, username=username)
     if not default_token_generator.check_token(user, confirmation_code):
-        message = {"confirmation_code": "Неверный код подтверждения"}
+        message = {'confirmation_code': 'Неверный код подтверждения'}
         return Response(message, status=status.HTTP_400_BAD_REQUEST)
     access_token = AccessToken.for_user(user)
     return Response({'token': str(access_token)})
 
 
-class UserForAdminViewSet(viewsets.ModelViewSet):
+class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = [IsAdmin]
