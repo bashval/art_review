@@ -1,16 +1,20 @@
-from rest_framework import mixins, viewsets
+from rest_framework import filters, mixins, viewsets
 from rest_framework.pagination import PageNumberPagination
 
-from .permissions import IsOwnerOrStaffOrReadOnly
+from .permissions import IsOwnerOrStaffOrReadOnly, IsAdminOrReadOnly
 
 
-class CreateListDestroyViewset(
+class CategoryGenreMixin(
     mixins.ListModelMixin,
     mixins.CreateModelMixin,
     mixins.DestroyModelMixin,
     viewsets.GenericViewSet
 ):
-    pass
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('name',)
+    lookup_field = 'slug'
+    permission_classes = (IsAdminOrReadOnly,)
+    pagination_class = PageNumberPagination
 
 
 class ReviewCommentMixin:
