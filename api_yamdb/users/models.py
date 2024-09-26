@@ -4,7 +4,7 @@ from django.db import models
 from .constants import USER_ROLE_LENGTH, EMAIL_LENGTH
 
 
-class CustomUser(AbstractUser):
+class Users(AbstractUser):
     ADMIN = 'admin'
     MODERATOR = 'moderator'
     USER = 'user'

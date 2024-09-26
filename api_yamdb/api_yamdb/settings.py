@@ -62,7 +62,7 @@ WSGI_APPLICATION = 'api_yamdb.wsgi.application'
 
 # User Model
 
-AUTH_USER_MODEL = 'users.CustomUser'
+AUTH_USER_MODEL = 'users.Users'
 
 
 # Database
