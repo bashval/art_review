@@ -23,7 +23,6 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
-    # 'django_filters',
     'api.apps.ApiConfig',
     'reviews.apps.ReviewsConfig',
     'users.apps.UsersConfig',
@@ -63,7 +62,7 @@ WSGI_APPLICATION = 'api_yamdb.wsgi.application'
 
 # User Model
 
-AUTH_USER_MODEL = 'users.CustomUser'
+AUTH_USER_MODEL = 'users.Users'
 
 
 # Database
@@ -140,6 +139,10 @@ SIMPLE_JWT = {
 }
 
 
+# Email Backend
+
 EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
 
 EMAIL_FILE_PATH = BASE_DIR / 'sent_emails'
+
+CONFIRMATION_EMAIL = 'from@dummy-mail.com'

@@ -1,6 +1,5 @@
 from django.contrib.auth import get_user_model
 from django.contrib.auth.tokens import default_token_generator
-from django.shortcuts import get_object_or_404
 
 from rest_framework import filters, status, viewsets
 from rest_framework.decorators import api_view, permission_classes, action
@@ -15,7 +14,7 @@ from .serializers import (
     UserSignupSerializer,
     TokenObtainSerializer
 )
-from .utils import send_confirmatio_mail
+from .utils import send_confirmation_mail
 
 
 User = get_user_model()
@@ -25,20 +24,14 @@ User = get_user_model()
 @permission_classes([AllowAny])
 def user_signup_view(request):
     serializer = UserSignupSerializer(data=request.data)
-    if User.objects.filter(
-        username=request.data.get('username'),
-        email=request.data.get('email')
-    ).exists():
-        user = User.objects.get(username=request.data.get('username'))
-        serializer = UserSignupSerializer(user, data=request.data)
+
     serializer.is_valid(raise_exception=True)
     serializer.save()
-    username = serializer.validated_data.get('username')
-    email = serializer.validated_data.get('email')
-    user = User.objects.get(username=username)
-    if not (request.user.is_authenticated and request.user.role == User.ADMIN):
-        code = default_token_generator.make_token(user)
-        send_confirmatio_mail(email, code)
+
+    if not (request.user.is_authenticated and request.user.is_admin):
+        email = serializer.validated_data.get('email')
+        code = default_token_generator.make_token(serializer.instance)
+        send_confirmation_mail(email, code)
     return Response(serializer.data, status=status.HTTP_200_OK)
 
 
@@ -47,17 +40,14 @@ def user_signup_view(request):
 def obtain_token_view(request):
     serializer = TokenObtainSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
-    username = serializer.validated_data.get('username')
-    confirmation_code = serializer.validated_data.get('confirmation_code')
-    user = get_object_or_404(User, username=username)
-    if not default_token_generator.check_token(user, confirmation_code):
-        message = {"confirmation_code": "Неверный код подтверждения"}
-        return Response(message, status=status.HTTP_400_BAD_REQUEST)
+    user = User.objects.get(
+        username=serializer.validated_data.get('username')
+    )
     access_token = AccessToken.for_user(user)
     return Response({'token': str(access_token)})
 
 
-class UserForAdminViewSet(viewsets.ModelViewSet):
+class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = [IsAdmin]
