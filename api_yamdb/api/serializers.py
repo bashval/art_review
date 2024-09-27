@@ -1,4 +1,5 @@
 from datetime import datetime
+from collections import OrderedDict
 
 from rest_framework import serializers
 
@@ -58,19 +59,46 @@ class TitleReadSerializer(serializers.ModelSerializer):
         return value
 
 
+class CustomSlugField(serializers.SlugRelatedField):
+
+    def __init__(self, represent_field=None, **kwargs):
+        assert represent_field is not None, (
+            'The `represent_field` argument is required.'
+        )
+        self.represent_field = represent_field
+        super().__init__(**kwargs)
+
+    def to_representation(self, obj):
+        ret = OrderedDict()
+        fields = self.represent_field
+
+        for field in fields:
+            value = getattr(obj, field)
+            ret[field] = value
+        return ret
+
+
 class TitleSerializer(serializers.ModelSerializer):
     """Сериализатор произведений для Create, Update и Delete."""
 
-    category = serializers.SlugRelatedField(
-        slug_field='slug', queryset=Category.objects.all()
+    category = CustomSlugField(
+        queryset=Category.objects.all(),
+        slug_field='slug',
+        represent_field=('name', 'slug')
     )
-    genre = serializers.SlugRelatedField(
-        slug_field='slug', queryset=Genre.objects.all(), many=True
+    genre = CustomSlugField(
+        queryset=Genre.objects.all(),
+        slug_field='slug',
+        many=True,
+        represent_field=('name', 'slug'),
+        allow_null=False
     )
 
     class Meta:
 
-        fields = '__all__'
+        fields = (
+            'id', 'name', 'year', 'description', 'genre', 'category',
+        )
         model = Title
 
 
