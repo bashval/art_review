@@ -53,17 +53,14 @@ class TitleViewSet(viewsets.ModelViewSet):
     ordering = ('name', 'id')
 
     def get_serializer_class(self):
-        """Получение произведений."""
         if self.action in ('retrieve', 'list'):
             return TitleReadSerializer
         return TitleSerializer
 
     def update(self, request, *args, **kwargs):
-        """Обновление произведения."""
         raise exceptions.MethodNotAllowed(request.method)
 
     def partial_update(self, request, *args, **kwargs):
-        """Обновление произведения."""
         instance = self.get_object()
         serializer = self.get_serializer(
             instance, data=request.data, partial=True
