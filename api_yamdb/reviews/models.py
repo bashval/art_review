@@ -59,7 +59,7 @@ class Title(models.Model):
     year = models.SmallIntegerField(
         verbose_name='Год выпуска',
         validators=[MaxValueValidator(timezone.now().year)],
-        )
+    )
     description = models.TextField(verbose_name='Описание')
     genre = models.ManyToManyField(
         Genre,

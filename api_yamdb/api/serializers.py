@@ -1,4 +1,3 @@
-from collections import OrderedDict
 from datetime import datetime
 
 from rest_framework import serializers
@@ -29,46 +28,17 @@ class GenreSerializer(serializers.ModelSerializer):
         lookup_field = 'slug'
 
 
-class CustomSlugField(serializers.SlugRelatedField):
+class TitleReadSerializer(serializers.ModelSerializer):
+    """Сериализатор произведений для чтения."""
 
-    def __init__(self, represent_field=None, **kwargs):
-        assert represent_field is not None, (
-            'The `represent_field` argument is required.'
-        )
-        self.represent_field = represent_field
-        super().__init__(**kwargs)
-
-    def to_representation(self, obj):
-        ret = OrderedDict()
-        fields = self.represent_field
-
-        for field in fields:
-            value = getattr(obj, field)
-            ret[field] = value
-        return ret
-
-
-class TitleSerializer(serializers.ModelSerializer):
-    category = CustomSlugField(
-        queryset=Category.objects.all(),
-        slug_field='slug',
-        represent_field=('name', 'slug')
-    )
-    genre = CustomSlugField(
-        queryset=Genre.objects.all(),
-        slug_field='slug',
-        many=True,
-        represent_field=('name', 'slug'),
-        allow_null=False
-    )
-    description = serializers.CharField(required=False)
     rating = serializers.IntegerField(required=False, allow_null=True)
+    category = CategorySerializer(read_only=True)
+    genre = GenreSerializer(read_only=True, many=True)
 
     class Meta:
+
+        fields = '__all__'
         model = Title
-        fields = (
-            'id', 'name', 'year', 'description', 'genre', 'category', 'rating'
-        )
 
     def validate_year(self, value):
         current_year = datetime.now().year
@@ -84,6 +54,22 @@ class TitleSerializer(serializers.ModelSerializer):
                 'Это поле не может быть пустым.'
             )
         return value
+
+
+class TitleSerializer(serializers.ModelSerializer):
+    """Сериализатор произведений для Create, Update и Delete."""
+
+    category = serializers.SlugRelatedField(
+        slug_field='slug', queryset=Category.objects.all()
+    )
+    genre = serializers.SlugRelatedField(
+        slug_field='slug', queryset=Genre.objects.all(), many=True
+    )
+
+    class Meta:
+
+        fields = '__all__'
+        model = Title
 
 
 class CustomDefault:
