@@ -1,4 +1,4 @@
-from rest_framework import mixins, viewsets
+from rest_framework import filters, mixins, viewsets
 from rest_framework.pagination import PageNumberPagination
 
 from .permissions import IsOwnerOrStaffOrReadOnly
@@ -10,7 +10,9 @@ class CreateListDestroyViewset(
     mixins.DestroyModelMixin,
     viewsets.GenericViewSet
 ):
-    pass
+    lookup_field = 'slug'
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('name',)
 
 
 class ReviewCommentMixin:

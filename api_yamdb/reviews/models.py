@@ -1,6 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
+from django.utils import timezone
 
 from .constants import MAX_SCORE, MIN_SCORE, NAME_LENGTH, SLUG_LENGTH
 
@@ -31,7 +32,9 @@ class Genre(models.Model):
 class Category(models.Model):
     """Категории."""
 
-    name = models.CharField(verbose_name='Наименование', max_length=256)
+    name = models.CharField(
+        verbose_name='Наименование', max_length=NAME_LENGTH
+    )
     slug = models.SlugField(
         verbose_name='Идентификатор',
         max_length=SLUG_LENGTH,
@@ -53,7 +56,10 @@ class Title(models.Model):
     name = models.CharField(
         verbose_name='Произведение', max_length=NAME_LENGTH
     )
-    year = models.SmallIntegerField(verbose_name='Год выпуска',)
+    year = models.SmallIntegerField(
+        verbose_name='Год выпуска',
+        validators=[MaxValueValidator(timezone.now().year)],
+        )
     description = models.TextField(verbose_name='Описание')
     genre = models.ManyToManyField(
         Genre,
