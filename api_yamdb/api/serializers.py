@@ -37,7 +37,9 @@ class TitleReadSerializer(serializers.ModelSerializer):
 
     class Meta:
 
-        fields = '__all__'
+        fields = (
+            'id', 'name', 'year', 'description', 'genre', 'category', 'rating'
+        )
         model = Title
 
     def validate_year(self, value):
