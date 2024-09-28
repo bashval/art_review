@@ -67,16 +67,16 @@ class ReviewViewSet(ReviewCommentMixin, viewsets.ModelViewSet):
 
     serializer_class = ReviewSerializer
 
-    @property
     def get_title(self):
         title = get_object_by_pk(Title, self.kwargs, pk='title_id')
         return title
 
     def get_queryset(self):
-        return self.get_title.reviews.all()
+        title = self.get_title()
+        return title.reviews.all()
 
     def perform_create(self, serializer):
-        serializer.save(author=self.request.user, title=self.get_title)
+        serializer.save(author=self.request.user, title=self.get_title())
 
 
 class CommentViewSet(ReviewCommentMixin, viewsets.ModelViewSet):
@@ -91,10 +91,11 @@ class CommentViewSet(ReviewCommentMixin, viewsets.ModelViewSet):
         return review
 
     def get_queryset(self):
-        return self.get_review.comments.all()
+        comments = self.get_review()
+        return comments.comments.all()
 
     def perform_create(self, serializer):
-        serializer.save(author=self.request.user, review=self.get_review)
+        serializer.save(author=self.request.user, review=self.get_review())
 
 
 @api_view(['POST'])
