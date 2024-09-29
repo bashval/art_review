@@ -1,4 +1,3 @@
-from collections import OrderedDict
 from datetime import datetime
 
 from django.contrib.auth import get_user_model
@@ -54,40 +53,24 @@ class TitleReadSerializer(TitleBase):
     genre = GenreSerializer(many=True)
 
 
-class TitleCreateSlugField(serializers.SlugRelatedField):
-
-    def __init__(self, represent_field=None, **kwargs):
-        assert represent_field is not None, (
-            'The `represent_field` argument is required.'
-        )
-        self.represent_field = represent_field
-        super().__init__(**kwargs)
-
-    def to_representation(self, obj):
-        ret = OrderedDict()
-        fields = self.represent_field
-
-        for field in fields:
-            value = getattr(obj, field)
-            ret[field] = value
-        return ret
-
-
 class TitleCreateSerializer(TitleBase):
-    category = TitleCreateSlugField(
-        queryset=Category.objects.all(),
-        slug_field='slug',
-        represent_field=('name', 'slug')
-    )
-    genre = TitleCreateSlugField(
-        queryset=Genre.objects.all(),
-        slug_field='slug',
-        many=True,
-        represent_field=('name', 'slug'),
-        allow_null=False
-    )
+    category = serializers.SlugRelatedField(
+        slug_field='slug', queryset=Category.objects.all())
+    genre = serializers.SlugRelatedField(
+        slug_field='slug', queryset=Genre.objects.all(), many=True)
     description = serializers.CharField(required=False)
     rating = serializers.IntegerField(required=False, allow_null=True)
+
+    def to_representation(self, instance):
+        ret = super().to_representation(instance)
+        ret['genre'] = GenreSerializer(
+            Genre.objects.filter(slug__in=ret['genre']),
+            many=True
+        ).data
+        ret['category'] = CategorySerializer(
+            Category.objects.get(slug=ret['category'])
+        ).data
+        return ret
 
     def validate_year(self, value):
         current_year = datetime.now().year
