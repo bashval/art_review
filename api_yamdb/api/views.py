@@ -68,12 +68,10 @@ class ReviewViewSet(ReviewCommentMixin, viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
 
     def get_title(self):
-        title = get_object_by_pk(Title, self.kwargs, pk='title_id')
-        return title
+        return get_object_by_pk(Title, self.kwargs, pk='title_id')
 
     def get_queryset(self):
-        title = self.get_title()
-        return title.reviews.all()
+        return self.get_title().reviews.all()
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user, title=self.get_title())
@@ -85,14 +83,12 @@ class CommentViewSet(ReviewCommentMixin, viewsets.ModelViewSet):
     serializer_class = CommentSerializer
 
     def get_review(self):
-        review = get_object_by_pk(
+        return get_object_by_pk(
             Review, self.kwargs, pk='review_id', title__id='title_id'
         )
-        return review
 
     def get_queryset(self):
-        comments = self.get_review()
-        return comments.comments.all()
+        return self.get_review().comments.all()
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user, review=self.get_review())
