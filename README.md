@@ -1,47 +1,85 @@
-# api_yamdb
-## Описание:
-Проект YaMDb собирает отзывы пользователей на произведения. Сами произведения в YaMDb не хранятся, здесь нельзя посмотреть фильм или послушать музыку.
-Произведения делятся на категории, такие как «Книги», «Фильмы», «Музыка». Например, в категории «Книги» могут быть произведения «Винни-Пух и все-все-все» и «Марсианские хроники», а в категории «Музыка» — песня «Давеча» группы «Жуки» и вторая сюита Баха. Список категорий может быть расширен (например, можно добавить категорию «Изобразительное искусство» или «Ювелирка»).
+<h1 align="center"> API YaMDb </h1>
 
-В данном проекте реализованна только бэкенд часть для API взаимодействия.
+The **YaMDb** project collects user reviews for various works. The works themselves are not stored or provided - users cannot watch movies or listen to music directly on the platform.
 
-## Как запустить проект:
-Клонировать репозиторий и перейти в него в командной строке:
+Works are grouped into categories such as **Books**, **Movies**, and **Music**. The list of categories can be extended (e.g., you could add categories like "Visual Art" or "Jewelry").
 
-`git clone https://github.com/bashval/api_yamdb.git`
 
-`cd api_yambd`
+## Features
+- REST API backend implemented only
+- User authentication implemented using JWT token with data verification and password reset via email
+- Complex database relationships with cascade deletion
+- Complex serialization with nested serializers 
+- Data import from CSV file using custom management-command
 
-Cоздать и активировать виртуальное окружение:
 
-`python3 -m venv env source env/bin/activate`
+## 🛠️ Tech Stack
 
-Установить зависимости из файла requirements.txt:
+![Python](https://img.shields.io/badge/Python_3.x-3776AB?logo=python&logoColor=yellow)
+![Django](https://img.shields.io/badge/Django-092E20?logo=django&logoColor=white)
+![DRF](https://img.shields.io/badge/DRF%20(Django%20REST)-8C1D40?logo=django&logoColor=white)
+![SQLite](https://img.shields.io/badge/-SQLite-003B57?logo=sqlite&logoColor=white)
 
-`pip install -r requirements.txt`
 
-Выполнить миграции:
+## How to Run the Project
 
-`python3 manage.py migrate`
+1. Clone the repository and navigate into the project directory:
 
-Запустить проект:
+```bash
+git clone https://github.com/bashval/api_yamdb.git
+cd api_yamdb
+```
 
-`python3 manage.py runserver`
+2. Create and activate a virtual environment:
 
-## Импорт фикстур из CSV
-В проекте реализована возможность импорта данных в базу данных из CSV файла. Для импорта необходимо использовать management-команду:
+```bash
+python3 -m venv env
+source env/bin/activate
+```
 
-`python3 manage.py load_CSV <имя_файла>`
+3. Install dependencies from `requirements.txt`:
 
-Имя файла должно соответствовать имени модели, в которую осуществляется импорт. Имена колонок csv файла соответсующие полям внешних ключей связанных моделей дожны заканчиваться на "_id".
+```bash
+pip install -r requirements.txt
+```
 
-Примеры файлов-фикстур для всех моделей можно найти в папке 'api_yamdb/static/data/' 
+4. Apply database migrations:
 
-## API Документация:
-После запуска проекта документация к API доступна по адресу:
+```bash
+python3 manage.py migrate
+```
 
-`http://127.0.0.1:8000/redoc/`
+5. Run the development server:
 
-## Авторы проекта
-Данный проект выполнялся в качестве задания для группового проекта курса Python-разработчика [Яндекс.Практикума](https://practicum.yandex.ru/).  
-Авторы проекта: [Валентин Башкатов](https://github.com/bashval), [Сергей Олейников](https://github.com/Sergey-Anatoli4) и [Санжар Серик](https://github.com/S4nzh4r).
+```bash
+python3 manage.py runserver
+```
+
+
+## Importing Fixtures from CSV
+
+The project supports importing data from CSV files into the database.
+To do this, use the custom Django management command:
+
+```bash
+python3 manage.py load_CSV <file_name>
+```
+
+* The filename must match the model name into which the data is being imported.
+* Column names for foreign key fields must end with `_id`.
+
+Example fixture files for all models can be found in the directory:
+`api_yamdb/static/data/`
+
+
+## API Documentation
+
+Once the server is running, API documentation is available at:
+[http://127.0.0.1:8000/redoc/](http://127.0.0.1:8000/redoc/)
+
+
+## Contributors
+
+* [Valentin Bashkatov](https://github.com/bashval)
+* [Sergey Oleynikov](https://github.com/Sergey-Anatoli4)
+* [Sanzhar Serik](https://github.com/S4nzh4r)
